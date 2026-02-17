@@ -1,6 +1,9 @@
 const User = require("../models/userSchema");
 const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
+var jwt = require("jsonwebtoken");
+const dotenv = require("dotenv").config;
+var cookie = require("cookie");
 
 // Register User
 exports.registerUser = async (req, res, next) => {
@@ -86,6 +89,12 @@ exports.loginUser = async (req, res, next) => {
 
     if (!user) {
       res.status(404).json({
+        message: "User Not Found",
+      });
+    }
+
+    if (!user) {
+      res.status(404).json({
         message: "User not found",
       });
     }
@@ -98,6 +107,19 @@ exports.loginUser = async (req, res, next) => {
       });
     }
 
+    // Token generation
+    var token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    // 4️⃣ Store token in HTTP-only cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
+
     // 4. Success
     res.status(200).json({
       message: "Login successful",
@@ -106,6 +128,7 @@ exports.loginUser = async (req, res, next) => {
         name: user.name,
         email: user.email,
       },
+      token,
     });
   } catch (error) {
     res.status(400).json({

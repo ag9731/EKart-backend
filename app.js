@@ -15,4 +15,7 @@ app.use(cors({
 const user = require("./routes/userRoutes");
 app.use("/api/v1",user)
 
+const product = require("./routes/productRoutes");
+app.use("/api/v1",product);
+
 module.exports = app;

@@ -88,13 +88,7 @@ exports.loginUser = async (req, res, next) => {
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
-      res.status(404).json({
-        message: "User Not Found",
-      });
-    }
-
-    if (!user) {
-      res.status(404).json({
+      return res.status(404).json({
         message: "User not found",
       });
     }
@@ -102,7 +96,7 @@ exports.loginUser = async (req, res, next) => {
     const passwordCheck = await bcrypt.compare(password, user.password);
 
     if (!passwordCheck) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "Please input correct password",
       });
     }
@@ -121,7 +115,7 @@ exports.loginUser = async (req, res, next) => {
     });
 
     // 4. Success
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful",
       user: {
         _id: user._id,
@@ -131,7 +125,7 @@ exports.loginUser = async (req, res, next) => {
       token,
     });
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       message: error.message,
     });
   }
